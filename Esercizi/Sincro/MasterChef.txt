@@ -1,0 +1,66 @@
+E' in atto la selezione degli aspiranti della 12a edizione di MasterChef Italia.
+Nel grande salone di attesa possono prendere posto al piu' N aspiranti cuochi,
+  mentre i restanti prenderanno parte alla sessione di prova di cucina successiva.
+Le sessioni previste sono M. Ogni aspirante cuoco che ha trovato posto sara' chiamato nella sala cucina dai tre Chef stellati.
+Nel salone di attesa sono disponibili Z(<N) tavoli da cucina portatili per esercitarsi durante l'attesa,
+  e che ciascun cuoco portera' con se nella sala cucina durante la propria prova.
+I tavoli per le esercitazioni sono distribuiti concorrentemente ai piu' veloci ad accaparrarseli.
+Terminata la prova l'aspirante cuoco lascia la postazione in sala cucina facendo posto al prossimo candidato e rilasciando il tavolo da cucina portatile disponibile
+  per un altro cuoco dell'ultima sessione di prova.
+-------------------------------------------------------------------------------------
+
+VAR : 
+sessioni : semaforo = M;
+posti : semaforo = N;
+
+cuochi_prova : semaforo = 0;
+tavoli : semaforo = Z; //<N
+
+cuochi_attesa : int = 0;
+
+mutex : mutex = 1;
+
+inizio : condizione = 0;
+
+Cuoco(){
+	//Segnala la tua entrata, a prescindere se c'e' posto
+	lock(mutex);
+	cuochi_attesa++;
+	unlock(mutex);
+	lock(mutex);
+	//Se c'e' posto, entro
+	if(posti < N){
+		wait(posti);
+		//Cerco di prendere un tavolo
+		wait(tavoli);	
+		//Se preso tavolo, posso partecipare
+		signal(cuochi_prova);
+		//Aspetto l'inizio
+		wait(inizio);
+		//Rilascia le var ed esci
+		signal(posti);
+		lock(mutex);
+		cuochi_attesa--;
+		unlock(mutex);
+		Esci(); //exit()
+	}
+	unlock(mutex);
+}
+
+Chef(){
+	//Finche' ci sono sessioni da fare
+	while(sessioni > 0){
+		//Diminuisco di uno il numero di sessioni da fare
+		wait(sessioni);
+		//Segnalo che inizio la sessione
+		signal_broadcast(inizio); //for (i=1 to cuochi_prova){signal(inizio);}
+		//Finche' ci sono cuochi nella sessione
+		while(cuochi_prova > 0){
+			//Chiama un cuoco
+			wait(cuochi_prova);
+			//Esaminalo sessualmente
+			Esegui_Prova();
+		}
+	}
+	//Termina
+}
