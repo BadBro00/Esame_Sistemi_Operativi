@@ -1,3 +1,7 @@
+/*
+	Scrivere un programma POSIX C che crea un figlio e gli invia un segnale SIGUSR1
+*/
+
 #include <signal.h>
 #include <stdio.h>
 #include <sys/types.h>
