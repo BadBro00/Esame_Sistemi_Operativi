@@ -1,0 +1,45 @@
+SINCRO HAUBER
+-----------------------
+
+1) RISTORANTE SELF-SERVICE
+
+In un ristorante self-service, i clienti, dopo aver mangiato, dispongono i vassoi in M contenitori,
+ognuno di K ripiani.
+
+Periodicamente, un addetto sceglie un contenitore tra quelli un cui ci sono piu' ripiani liberi.
+Lo svuota, lava i piatti e riporta il contenitore in sala.
+
+======================SVOLGIMENTO==============================
+
+var:
+
+contenitori : const int = M;
+ripiani : const int = K;
+
+array : array[M] = {K,...,K};
+
+mutex : mutex = 1;
+
+--------------------------
+
+Addetto(){
+  while(1){
+	contenitore = trova_min(array) //ritorna l'indice del contenitore con meno ripiani occupati  
+	array[contenitore] = 0;
+	//Lava_Vassoi()
+	array[contenitore] = K;
+	sleep(5);
+  }
+}
+
+Cliente(){
+   while(1){
+	//Mangia()
+	lock(mutex);
+	for i=1 to M
+	    if(array[i] != K)
+		array[i]++;
+	unlock(mutex);
+	//Esci()
+   }
+}
