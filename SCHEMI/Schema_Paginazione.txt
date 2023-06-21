@@ -1,0 +1,78 @@
+La paginazione e' un esercizio in cui vengono forniti tre dati:
+
+  1) Dimensione totale della memoria fisica.
+  2) Dimensione massima dello spazio logico di un programma.
+  3) Dimensione delle pagine.
+  
+Si chiede di calcolare, oltre alle dimensioni in bit di numeri di pagina e frame, e da quanti bit sono rappresentati indirizzi logici e fisici, di tradurre in fisici
+  gli indirizzi logici forniti, ad un certo istante di tempo in cui la tabella delle pagine di un processo e' data nella traccia.
+  
+
+Ad esempio:
+
+    Dim. Memoria fisica : 256byte
+    Dim. Spazio Logico : 64byte
+    Dim. Pagine : 4byte
+    
+    i) Da quanti bit sono composti gli indirizzi logici e quelli fisici?
+    ii) Da quanti bit sono composti i numeri di pagina?
+    iii) Da quanti bit sono composti i numeri di frame?
+    iv) Ad un certo istante, la tabella delle pagine di un processo e' la seguente:
+    
+                               |TABELLA|
+                   ---------------------------------
+                    0             |              12
+                    1             |              1
+                    2             |              17
+                    3             |              62
+                    4             |              11
+                    5             |              16
+                    6             |              61
+                    7             |              12
+                  -----------------------------------                    
+      Tradurre in indirizzi fisici i seguenti indirizzi logici : 0,2,4,9,19,11,22,32,30,26,23,36.
+
+Avendo queste informazioni, possiamo dedurre che:
+
+      1) La dimensione delle pagine e' 4 byte, quindi avremo:
+              pg0 : [0,3]
+              pg1 : [4,7]
+              pg2 : [8,11]
+              ...
+                                    |MEM. VIRTUALE|
+      2) Abbiamo 4byte (32 bit) per la dimensione delle pagine, quindi abbiamo che nb equivale a:
+            nb : 2^x = 32 -> x = 5 => nb = x = 5.
+      3) Avendo 32 bit, di cui 5 sono utilizzati per l'offset (nb), ci rimangono 27 bit per indicare la pagina (np)
+                                      |MEM. FISICA|
+      4) Come totale della mem.a fisica abbiamo 256byte (2048 bit), dunque per rappresentare il numero di frame e offset:
+              nf : 2^x = 2048 -> 11 (nf+offset).
+         Sapendo che l'offset occupa 5 bit, avremo che nf = 6 bit.
+         
+      5) Ora possiamo quindi procedere col punto iv).
+      
+            a) Trovare la pagina logica a cui fa riferimento l'indirizzo logico.
+            b) Calcolare l'offset della pagina
+            c) Usare la formula (#pag*ind_log)+offset
+            
+            Ad esempio, prendiamo l'indirizzo logico 0:
+                
+                0 fa riferimento alla pagina #0 (perche' 0 appartiene all'intervallo [0,3]
+                
+                La pagina 0 fa riferimento alla pagina fisica 12.
+                
+                L'offset della pagina e' (0 % 4) = 0
+                
+                Avremo quindi che l'indirizzo fisico e' :
+                
+                      (0 * 0) + 0 = 0.
+                      
+            Prendendo come riferimento l'indirizzo logico 9:
+                9 fa riferimento alla pagina #2 (perche' 9 appartiene all'intervallo [8,11])
+                
+                La pagina 2 fa riferimento alla pagina fisica 17
+                
+                L'offset della pagina e' ( 9 % 4 ) = 1
+                
+                Avremo quindi che l'indirizzo fisico e' :
+                      
+                      (9 * 2) + 1 = 19
