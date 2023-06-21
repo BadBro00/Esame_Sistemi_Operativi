@@ -1,0 +1,60 @@
+In un sistema sono attivi N worker e N/2 master. Il master i-simo controlla i worker (i*2)-simo e (i*2+1)-simo.
+Inizialmente i master estraggono un numero nell'intervallo [1,N]. Il master che ha estratto il numero maggiore, comunica ai propri worker di produrre
+ognuno un numero casuale di elementi. Gli elementi sono prodotti uno alla volta e inseriti in un buffer singolo da cui il master li legge.
+Quando il master ha letto tutti gli elementi prodotti, il procedimento viene ripetuto di nuovo dall'inizio.
+------------------------------------------------------------------------------------------------------------------------------------------------------
+VAR:
+
+workers : const int = N
+masters : const int = N/2
+
+extr_num : int = 0
+max_idx : int = 0
+number_els : int = 0
+prod_idx : int = 0
+cons_idx : int = 0
+
+producing[N] : semaforo = {0,...,0}
+consuming[N/2] : semaforo = {1,...,1}
+estratti : semaforo = 0
+
+buffer : array[N] = {...}
+extracted_nums : array[N/2] = {...}
+
+mutex : mutex = 0
+------------------------------------------------------------------------------------------------------------------------------------------------------
+PROCESSI:
+
+Worker(i){
+	while(1){
+		wait(producing[i])
+		for i=1 to number_els {
+			lock(mutex)
+			array[prod_idx] = rand()%256
+			prod_idx++
+			unlock(mutex)
+		}
+	}
+}	
+	
+Master(i){
+	while(1){
+		lock(mutex)
+		extracted_nums[i] = rand()%N
+		signal(estratti)
+		unlock(mutex)
+		if(estratti == N/2){
+			//Function che ritorna l'indice del valore massimo, ovvero quale master l'ha estratto
+			max_idx = findMax(extracted_nums[])
+			if (max_idx == i){
+				number_els = rand()%256
+				while(number_els > 0){
+					signal(producing[i*2])
+					signal(producing[i*2+1])
+				}
+				wait(consuming[i])
+				lock(mutex)		
+			}
+		}	
+	}
+}			
