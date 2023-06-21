@@ -1,0 +1,37 @@
+In un sistema sono attivi N processi. Ogni processo si attribuisce un ID univoco nel sistema, con 0<=ID<N. 
+Una volta che tutti i processi sono dotati di ID, si dividono in due gruppi: 
+	quelli con ID pari 
+	e quelli con ID dispari. 
+All’interno di ogni gruppo si elegge come leader il processo con PID (assegnato dal SO) minore. 
+Il primo dei due leader che accede all’area di memoria condivisa M, ne stampa il contenuto a video.
+Il procedimento viene ripetuto a partire dall’assegnazione degli ID.
+-----------------------------------------------------------------------------------------------------------
+VAR:
+NProc : const int = N
+myID : int = 0
+
+proc_IDs : array[NProc] = {...}
+pids : array[NProc] = {...}
+mypid : pid = 0
+pid_Leader : pid = 0
+
+pidPari : array[] = {...}
+pidDisp : array[] = {...}
+
+acceding : semaforo = 1
+
+mutex : mutex = 1
+-----------------------------------------------------------------------------------------------------------
+PROCESSI:
+P(i){
+	mypid = getpid()
+	pids[i] = mypid
+	myID = rand()%N
+	//Ciclo finchè la function non ritorna true
+	while( Trova_ID(proc_IDs) ){
+		//Trova_ID ritorna true se incontra nell'array lo stesso valore di ID
+		myID = rand()%N
+	}
+	proc_IDs = myID
+	
+}
