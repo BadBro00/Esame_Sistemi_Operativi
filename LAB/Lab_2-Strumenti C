@@ -1,0 +1,300 @@
+------------------------------------------------------------------------------------------------------------------------
+**Compilazione**
+
+Il compilatore di GNU Linux e' *gcc*, conforme allo standard POSIX. La sintassi base e' 
+
+```C
+gcc nomefile.c
+```
+Tale comando generera' un eseguibile, dal nome standard *a.out*.
+
+Vi sono pero' altre opzioni di compilazione:
+
+  -c : si ferma alla compilazione, generando i file oggetto senza linking dell'eseguibile finale
+  -g : genera informazioni utili per il debugging (*gdb*)
+  -o : permette di rinominare l'eseguibile ( gcc -o out generera' un eseguibile "out" )
+  -l : linka la libreria ( -l<nomelib> )
+  -v : genera informazioni dettagliate sulla compilazione
+  
+**Costruzione di un programma**
+Una volta scritto un programma, esso dev'essere trasformato in un eseguibile. Abbiamo tre fasi:
+
+  *Preprocessing* : Fornisce le macro per la sostituzione ripetitiva di stringhe
+  *Assembly* : Fornisce il programmatore dei nomi per le locazioni di memoria
+  *Linking* : Fornisce un modo per il riuso di codice eseguibile, esistente in programmi diversi
+  
+Le fasi intermedie possono essere mantenute fra i vari *build* del programma per velocizzarne i successivi
+
+**LINKING**
+La fase di linking serve innanzitutto per mettere assieme i file oggetto in un eseguibile.
+Tale fase e' anche utile per inserire i codici oggetto dalle librerie.
+In questo modo, il codice sorgente dovra' essere compilato un'unica volta, invece che tante quanti sono i file linkati.
+
+*Linking Dinamico*
+  Il linking dinamico collega una libreria in modo dinamico:
+  Il codice oggetto non e' copiato nell'eseguibile
+  Durante l'esecuzione del programma, se e' necessario codice di libreria, tale codice e' caricato in memoria direttamente dal file di lib
+
+*Linking Statico*
+  Il linking statico fa si che tutto il codice di libreria venga copiato nell'eseguibile, sprecando molto spazio ma rendendo l'esecuzione piu' veloce.
+
+------------------------------------------------------------------------------------------------------------------------
+**Debugger (GDB)**
+
+
+Il debugger e' un programma, e GNU/Linux utilizza *gdb*. Il file specificato come argomento e' caricato nel debugger, e permette di utilizzare vari comandi:
+
+step : esecuzione passo-passo
+print : stampa il valore di una variabile
+whatis : stampa il tipo di una variabile
+list : analizza il codice sorgente
+break : stabilisce dei breakpoint
+display : visualizza espressioni
+
+Per utilizzare il debugger, bisogna compilare il codice mediante ```C gcc -c <file.c>```, e poi si invoca gdb.
+```C
+gcc -c file.c
+gdb a.out
+```
+
+*Breakpoint*
+  Ponendo un breakpoint, si informa il debugger di eseguire il programma fino al punto indicato e poi di sospendere l'esecuzione
+  E' possibile poi riavviare l'esecuzione in tre modi:
+    Step : Esegue la prossima riga di codice e mette in pausa l'esecuzione
+    Next : Esegue la prossima riga, e se e' una chiamata ad una function, esegue tutte le sue istruzioni e poi mette in pausa.
+    Continue : Esegue il programma fino al breakpoint successivo
+ Per rimuovere tutti i breakpoint, si usa il comando *clear*
+
+```C
+(gdb) step
+8 for (i=0; i<10; i++)
+(gdb) next
+9 if (i<5)
+(gdb) next
+
+Breakpoint 1, main (argc=1, argv=0xbffff4a4) at sum.c:12
+12 sum=sum+((i-3)/2+(i/3));
+(gdb) next
+8 for (i=0; i<10; i++)
+(gdb) next
+9 if (i<5)
+(gdb) next
+
+Breakpoint 1, main (argc=1, argv=0xbffff4a4) at sum.c:12
+12 sum=sum+((i-3)/2+(i/3));
+(gdb)
+```
+
+*Visualizzare le variabili*
+Per visualizzare le variabili abbiamo due metodi: 
+  *print*, che stampa semplicemente il valore una volta
+  *display*, che stampa il valore ogni volta che l'esecuzione del programma e' in pausa
+
+```C
+(gdb) break 12
+Breakpoint 1 at 0x80483f1: file sum.c, line 12.
+(gdb) run
+Starting program: /home/giusal/a.out
+Breakpoint 1, main (argc=1, argv=0xbffff4a4) at sum.c:12
+12 sum=sum+((i-3)/2+(i/3));
+(gdb) display i
+1: i = 5
+(gdb) continue
+Continuing.
+
+Breakpoint 1, main (argc=1, argv=0xbffff4a4) at sum.c:12
+12 sum=sum+((i-3)/2+(i/3));
+1: i = 6
+(gdb)
+```
+
+------------------------------------------------------------------------------------------------------------------------
+**Crash dei programmi**
+
+*Segmentation Fault*
+  Un segmentation fault e' un accesso illegale alla memoria, dovuto al tentativo di accesso del programma ad un'area di memoria che non gli appartiene.
+
+*Ciclo infinito*
+  Un ciclo infinito e' un ciclo in cui la condizione d'uscita non puo' mai essere raggiunta. Tramite il debugger si possono ottenere informazioni sul ciclo.
+
+**Organizzazione del codice**
+
+Quando realizziamo un programma come un intero modulo, si presentano vari inconvenienti:
+  Ogni modifica richiede la compilazione *dell'intero programma*, avendo cosi' tempi di compilazione elevati.
+  Utilizzare il *cut&paste* non e' una soluzione adatta in termini di manutenzione, perche' ogni operazione dev'essere fatta su ogni copia, e' un processo lento e ogni copia occupa spazio nel disco
+  
+*Suddivisione in moduli*
+Un programma C complesso e' normalmente articolato in piu' file sorgenti, collegati in un unico eseguibile. Cio' aiuta a risolvere i problemi sopra citati.
+  Un file puo' cosi' essere usato da piu' programmi, consentendo *riusabilita' delle funzioni*.
+  Se un sorgente utilizza una funzione non contenuta nel file, deve contenere la dichiarazione del *prototipo* della funzione. 
+  Le direttive per il preprocessore e/o le definizioni di tipo devono essere presenti *in ogni file* che le utilizza.
+Per rendere un modulo facilmente riutilizzabile, si utilizza un **header file** contenente *direttive e definizioni di tipo*, e *prototipi*.
+
+```C
+/* reverse.h */
+/* Prototipo della funzione reverse */
+void reverse (char *, char *);
+
+/* reverse.c */
+#include <stdio.h>
+#include <string.h>
+#include "reverse.h"
+
+void reverse (char *before, char *after) {
+	/* before: puntatore alla stringa originaria */
+	/* after: puntatore alla stringa invertita */
+	int i, j, len;
+	len = strlen(before);
+	for (j=len-1, i=0; j>=0; j--, i++) /* Ciclo */
+	after[i] = before[j];
+	after[len] = '\0'; /* \0 termina la stringa invertita } */
+}
+```
+*Modulo del programma che contiene solo la function reverse()*
+```C
+/* usaRev.c */
+#include <stdio.h>
+#include <string.h>
+#include "reverse.h" /* contiene il prototipo di reverse */
+
+int main (int argc, char *argv[]) {
+	/* Buffer per la stringa invertita */
+	char str[strlen(argv[1])+1];
+	/* Inverte la stringa in ingresso */
+	reverse (argv[1], str);
+	/* Mostra il risultato */
+	printf ("reverse (\"%s\") = %s\n", argv[1], str); return 0;
+}
+```
+*Modulo del programma che contiene solo il main()*
+
+*Compilazione ed esecuzione*
+```C
+gcc -c reverse.c usaRev.c
+gcc reverse.o usarev.o -o programma
+./programma gatto
+  reverse ("gatto") = ottag
+```
+Volendo, possiamo cambiare il file reverse.c, e per ri-eseguire il programma, dovremo compilare solo il file che abbiamo modificato e non entrambi
+
+------------------------------------------------------------------------------------------------------------------------
+**Utility Make**
+
+*Gestione dipendenze*
+ La ricompilazione di un programma suddiviso in moduli puo' essere un'operazione laboriosa, pertanto si puo' predisporre uno shell script:
+ 
+```Bash
+#!/bin/bash
+ if [ reverse.o -ot reverse.c ] ||
+    [ reverse.o -ot reverse.h ]; then
+    gcc -c reverse.c
+ fi
+ if [ palindroma.o -ot palindroma.c ] ||
+    [ palindroma.o -ot palindroma.h ] ||
+    [ palindroma.o -ot reverse.h ]; then
+    gcc -c palindroma.c
+#...
+```
+
+UNIX mette a disposizione un'utility, ovvero il comando *make*, che consente la **manutenzione e l'aggiornamento** dei programmi.
+Il make controlla automaticamente se i sorgenti sono stati modificati dopo l'ultima esecuzione, compila i file sorgenti modificati e ricostruisce la versione aggiornata del programma.
+
+*Makefile*
+Formalmente, *make [-f makefile]* aggiorna un progetto sulla base di regole di dipendenza, contenute in un file di formato speciale, detto **makefile**.
+Per default, make si aspetta che le regole si trovino nel file *Makefile/makefile*, ma con l'opzione -f si puo' specificare un file diverso.
+
+Un esempio di makefile e' il seguente:
+```Makefile
+# makefile per prog
+# versione 1
+prog: main.o prog1.o prog2.o prog3.o prog4.o 
+	gcc -o main.o prog1.o ... prog4.o
+main.o: main.c
+	gcc -c main.c
+prog1.o: prog1.c
+	gcc -c prog1.c
+...
+prog4.o: prog4.c
+	gcc -c prog4.c
+```
+
+*Regole Makefile*
+ Una **linea di dipendenza** definisce la relazione fra un file *dipendente* (o *target*) e uno o piu' file *di dipendenza*.
+ Una **linea di comando** definisce le operazioni che *make* deve svolgere per passare da un file di dipendenza al target.
+ Digitando "make", si ottiene l'esecuzione delle linee di comando relative al primo file dipendente.
+ Se i file di dipendenza sono superati (datati), vengono eseguite le linee di comando necessario al loro aggiornamento
+ 
+*Macro*
+Possiamo rendere i makefile **parametrici**, ovvero includendo le *macro*:
+```Makefile
+   # makefile di prog
+   # versione 4
+   OGGETTI = main.o prog1.o ...
+   prog: $(OGGETTI)
+	 gcc $(OGGETTI) -o prog
+```
+Le macro vengono usate per definire elenchi di file, opzioni dei compilatori, librerie e comandi.
+Una macro e' quindi un assegnamento di una stringa ad un nome, che la rappresenta. Il valore della macro e' riferito con $(nome), o ${nome}.
+Le macro sono spesso usate per definire *path* di interesse.
+
+```Makefile
+$ cat makeprova
+OGGETTI = qdrig.o pippo.o
+OGGETTI1 = qdcol.o pluto.o
+MAIN = driver.o
+MAIN1 = driver_uno.o
+rows: $(OGGETTI) $(MAIN)
+	gcc -o rows $(OGGETTI) $(MAIN)
+columns: $(OGGETTI1) $(MAIN1)
+	gcc -o cols $(OGGETTI1) $(MAIN1)
+
+$ make -f makeprova rows
+gcc -c qdrig.c
+gcc -c pippo.c
+gcc -c driver.c
+gcc -o rows driver.o qdrig.o pippo.o
+
+$ make -f makeprova rows
+'rows' is up to date.
+```
+
+**Makefile Tipico**
+Automatizza le fasi legate alla compilazione ed installazione di un programma. Si distinguono tre target comuni:
+  **all** : azione da compiere quando non si indica alcun target (solitamente la compilazione)
+  **install** : installa l'eseguibile dopo la compilazione
+  **clean** : elimina i file oggetto e i binari compilati
+Quindi, abbiamo che:
+ $make : richiama il target *all* e compila il programma
+ $make install : installa gli eseguibili nella destinazione prevista
+ $make clean : pulisce la dir utilizzata per la compilazione
+ 
+```Makefile
+# directory destinazione
+  prefix = /usr/local
+  bindir = ${prefix}/bin
+
+  all: usaPal usaRev
+
+  install:
+	  cp usaPal usaRev ${bindir}
+  clean:
+    rm *.o usaPal usaRev
+  usaPal: palindroma.o reverse.o
+    usaPal.o : palindroma.h
+  palindroma.o : palindroma.h reverse.h
+  usaRev: reverse.o
+  usaRev.o: reverse.h
+  reverse.o: reverse.h
+```
+**Compressione**
+
+```Bash
+tar xf nome_tarball.tar # per un semplice file tar
+# Per i file compressi, con un passaggio alla volta, invece...
+gunzip nome_tarball.tar.gz
+tar xf nome_tarball.tar
+```
+
+```Bash
+tar [-x] [-f] [-c] [-v] nome_arch.tar [output_name] 
+```

@@ -1,0 +1,310 @@
+**Storia**
+
+- **1964**:
+  La AT&T, il MIT e la General Electric si uniscono nel progetto di un SO innovativo che sia multiutente, multitasking, multiprocessore e con file system gerarchico: il nome del progetto iniziale è **************MULTICS**************
+- **1969**:
+  Il progetto MULTICS fallisce, e dalle sue ceneri, nei laboratori Bell della AT&T nasce **Unix**, sviluppato da Thompson e Ritchie del gruppo MULTICS per un PDP-7; proprio sull’esperienza di MULTICS, vengono incorporate alcune caratteristiche e superati alcuni limiti di sistemi operativi preesistenti, supportando in maniera efficiente la multiutenza e il multitasking
+- **1973**:
+  La terza versione viene scritta nel linguaggio C sviluppato ai Bell Labs da Ritchie proprio per supportare Unix; questo fu un passo importante dato che esisteva la convinzione che solo il linguaggio Assembly permettesse di ottenere un livello di efficienza accettabile
+- **Fine anni ‘70**:
+  AT&T rende Unix largamente disponibile, offrendolo alle università a basso costo e distribuisce i sorgenti di varie versioni
+- **1983**:
+  Stallmann inizia una reimplementazione free di Unix detta GNU che porterà ad un editor (emacs), un compilatore (gcc), un debugger (gdb) e molti altri tool
+- **1984**:
+  Presso l’università di Berkeley nasce la ********************************************Berkeley Distribution******************************************** (BSD); molte delle sue caratteristiche vengono incorporate nella nuova versione di AT&T: la System V.
+- **1991**:
+  Torvald inizia l’implementazione di un kernel che prenderà il nome di Linux, che venne arricchito con i tool GNU esistenti ed altri sviluppati da volontari e diviene il sostituto completo di Unix. L’università di Berkeley rilascia una versione free di Unix rimuovendo il codice proprietario rimanente della AT&T. Altri progetti volontati continueranno poi il suo sviluppo come FreeBSD, NetBSD, OpenBSD
+- Ad oggi esistono diverse implementazioni di UNIX supportate da molte case costruttrici di computer: SunOS/Solaris, Ultrix, XENIX, AIX, etc…
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**Standard**
+
+La vasta diffusione delle diverse versioni di UNIX durante gli anni '80 rese indispensabile l'inizio di una standardizzazione da parte del governo USA:
+  1-Il C ha lo scopo di fornire *portabilita'*
+  2-POSIX viene adottato come standard (Portable Operating System Interface for UNIX)
+  3-XPG (X/Open Portability Guide)
+  4-SVID (SystemV Interface Definition)
+  
+  **POSIX**:
+    POSIX.1 definisce l'interfaccia fra i programmi applicativi ed il SO, nei termini di una lib di funzioni. Il suo obiettivo e' la portabilita' fra sistemi conformi a POSIX
+    POSIX.2 definisce il linguaggio di **shell** e i principali comandi. Il suo obiettivo e' la portabilit' degli shell script fra sistemi conformi a POSIX
+    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**ARCHITETTURA**
+
+Un SO puo' essere definito come un SW che controlla le risorse HW del computer, e fornisce un ambiente nel quale eseguire i programmi: tale software e' detto *Kernel*.
+L'interfaccia al kernel e' uno strato di SW chiamato *system call*, che costituiscono un punto d'accesso al kernel, e per essere eseguite richiedono la CPU in modalita' Kernel (0)
+Le librerie di funzioni comuni (printf,scanf...) sono costruite in cima all'interfaccia delle system call, perche' utilizzano i metodi che si trovano in quello *strato*.
+La *Shell* e' un'applicazione speciale che fornisce l'interfaccia con il kernel e che consente l'esecuzione di altre applicazioni
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**Autenticazione**
+
+Accedendo ad un sistema UNIX, dobbiamo inserire *nome utente* e *password*. Per ogni utente, esiste una combinazione unica di tali valori, che viene salvata nel file /etc/passwd.
+All'interno di tale file, troviamo varie informazioni: 
+  Il nome utente
+  Lo UID e il GID
+  La password *cifrata*
+  Home Directory
+  Shell
+Ciascun utente ha una combinazione differente di tali informazioni, perche' tali informazioni sono variabili per ciascuno.
+Un utente, che appartiene allo stesso group, ha UID diverso, e puo' utilizzare shell diverse.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**File e Directory**
+
+Il *File System* di UNIX e' organizzato come un insieme di file e directory in ordine **gerarchico**. La *root* del sistema e' una directory rappresentata come */*
+Una directory e' una tabella, al cui interno vi sono un nome ed un puntatore ad una struttura di informazioni per ciascun file o directory in essa contenuto.
+Gli attributi contenuti nella struttura forniscono informazioni circa la dimensione, il tipo di file, il proprietario ecc...
+
+```C
+#include <sys/types.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <error.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[ ])
+{
+	DIR * dp;
+	struct dirent * dirp;
+	if (argc != 2){
+		fprintf(stderr,"Uso: ./a.out <directory>\n");
+    exit(-1);
+  }
+	if ( (dp = opendir(argv[1])) == NULL){
+		perror("opendir");
+    exit(-2);
+  }
+	while ( (dirp = readdir(dp)) != NULL){
+		printf("%s\n", dirp->d_name);
+  }
+	closedir(dp);
+	exit(0);
+}
+```
+*Snippet di codice che mostra il funzionamento del comando "ls"*
+
+Eseguendolo sulla cartella /dev, avremo un risultato del tipo
+
+```C
+$ ./a.out /dev
+.
+..
+console
+tty
+mem
+kmem
+null
+mouse
+ecc...
+```
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**Input/Output**
+
+Quando un programma apre o crea un file, il kernel gli assegna (e quindi *ritorna*) un descrittore, usato per tutte le successive operazioni su quel file.
+I descrittori sono interi non negativi che identificano i file aperti.
+All'avvio, sono assegnati tre descrittori di default:
+  0 - STDIN : Standard Input (Tastiera)
+  1 - STDOUT : Standard Output (Schermo)
+  2 - STDERR : Standard Error (Schermo)
+Questi descrittori, per qualunque file, possono essere rediretti, tramite il *>*:
+
+```C
+ls > output.txt
+```
+*Tramite questo snippet, andremo a salvare le informazioni ritornate da ls sul file "output.txt" anziche' a schermo*
+
+**I/O NON BUFFERIZZATO**
+Nella libreria <unistd.h>, troveremo diverse funzioni di Input/Output, tutte *non bufferizzate*. Cio' significa che dovremo fornire un buffer a tali funzioni per farle funzionare.
+Le varie funzioni sono *open()*, *read()*, *write()*, *close()*, *lseek()*, eccetera, e lavorano tutte tramite i descrittori.
+
+
+```C
+#include <stdio.h>
+#include <error.h>
+#include <stdlib.h>
+
+#define BUFFSIZE 8192
+
+int main(){
+  int n;
+  char buf[BUFFSIZE];
+  while((n=read(stdin,buf,BUFFSIZE))> 0){
+    if(write(stdout,buf,n) != n){
+      perror("write");
+      exit(-1);
+    }
+ }
+ if(n < 0){
+  perror("read");
+  exit(-2);
+ }
+```
+*Questo snippet di codice andra' a leggere il contenuto di stdin (tastiera), e lo stampera' a schermo, nel descriptor stdout*
+Eseguendolo in questo modo:
+```C
+./a.out > output.txt
+```
+andremo a redirigere lo stdout nel file, mentre stderr e stdout resteranno allo schermo.
+Il programma copia le linee di caratteri che inseriamo da tastiera, stampandole a schermo, finche' non inseriremo il carattere di fine file (*Ctrl+D*)
+```C
+./a.out < input.txt > output.txt
+```
+*Con questo snippet invece andremo a prendere l'input dal file input.txt e lo salveremo sul file output.txt, difatti copiano il file in un altro*
+
+**Standard I/O**
+
+Le funzioni di I/O Standard forniscono un'interfaccia *bufferizzata* alle funzioni non bufferizzate.
+Queste interfaccie sono reperibili nella libreria <stdio.h>, e sono *printf()*, *scanf()*, *fgets()*, *fputs()*, ecc.
+Vi sono alcune differenze rispetto alle function non bufferizzate:
+
+  *La funzione fgets() legge un'intera linea*, mentre **read() legge un numero specifico di byte**
+  Simili differenze riguardano le altre funzioni e le loro controparti non bufferizzate
+
+```C
+#include<stdio.h>
+int main(void){
+	int c;
+	while ((c = getc(stdin)) != EOF)
+		if (putc(c, stdout) == EOF) {
+			printf(“errore di output\n”);
+			exit(1);
+		}
+	if (ferror(stdin)) {
+		printf(“errore di input\n”);
+		exit(1);
+	}
+	exit(0);
+}
+```C
+
+```
+
+*Con questo snippet, leggiamo dallo stdin, e scriviamo sullo stdout*
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**Programmi e Processi**
+
+Un *programma* e' un file eseguibile, che risiede nel File System, e viene caricato in memoria ed eseguito dal kernel quando viene eseguita una chiamata ad una function della famiglia *exec()*.
+Un programma in esecuzione e' detto *processo*, e ciascuno di essi e' identificato da un intero non negativo detto **PID** (Process ID).
+Il PID di un processo e' univoco *durante l'esecuzione*, ma al termine della stessa il PID puo' essere *riutilizzato* per un altro processo, e quindi eseguendo un programma due volte ad istanti diversi, vedremo che il suo PID cambia.
+
+**Controllo dei Processi**
+
+Esistono tre function principali per controllare i processi:
+  *fork()* : crea un nuovo processo
+  *exec()* : questa famiglia di function esegue un programma
+  *waitpid()* : attende la terminazione di un processo
+  
+
+```C
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <stdio.h>
+#include <error.h>
+#include <unistd.h>
+
+int main(void){
+	char buf[MAXLINE];
+	pid_t pid;
+	int status;
+	printf("%% ");
+	while (fgets(buf, MAXLINE, stdin) != NULL) {
+		buf[strlen(buf) - 1] = 0;
+		if ((pid = fork()) < 0){
+			perror("fork");
+      exit(-1);
+    }else if (pid == 0){
+			execlp(buf, buf, (char *) 0);
+			fprintf(stderr,"Non posso eseguire il processo\n");
+			exit(127);
+		}
+		if ((pid = waitpid(pid, &status, 0)) < 0) {
+			perror("waitpid");
+			printf("%% ");
+		}
+	} 
+	exit(0);
+}
+```
+*Questo snippet ci permette di simulare una shell, ed eseguire comandi.*
+
+
+```C
+$ ./a.out
+% date
+Sun Mar 1 03:04:47 EDT 2009
+% pwd
+/home/giusal/prova
+% ls
+Makefile
+a.out
+Prova.c
+% ^D
+$
+```
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**Gestione Errori**
+
+Per segnalare una situazione d'errore, le funzioni di UNIX spesso ritornano un valore negativo, e l'intero *errno* e' inizializzato ad un valore specifico che fornisce ulteriori informazioni.
+Nell'header <errno.h> si trovano le corrispondenze fra i valori di errno e le costanti ad esso associate.
+Inoltre, esistono delle function, come *strerror(int errnum)*, che associa ad errnum un messaggio d'errore, e *perror(const char *msg)*, che stampa la stringa msg, seguita da : ed un messaggio d'errore
+
+```C
+#include<errno.h>
+#include<stdio.h>
+#include<string.h>
+int main(int argc, char *argv[]){
+	fprintf(stderr, “EACCES: %s\n”, strerror(EACCES));
+	errno = ENOENT;
+	perror(argv[0]);
+	exit(0);
+}
+```
+*Questo snippet ci permette di vedere il funzionamento delle due function strerror e perror*
+
+```C
+$ ./a.out
+EACCESS: Permission denied
+./a.out: No such file or directory
+```
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**Segnali**
+
+Una tecnica per notificare ad un processo la situazione d'emergenza e' quella di usare i segnali.
+Se durante l'esecuzione di un processo premiamo Ctrl+C, gli inviamo un segnale *SIGINT*. 
+Al ricevimento di un segnale, vi sono tre possibili situazioni che possono avvenire:
+  1-Il processo *ignora* il segnale
+  2-Il processo fa eseguire l'azione di default
+  3-Il processo esegue una function differente da quella di default
+  
+La function che viene eseguita e' detta *handler*, e puo' essere modificata in modo che il processo esegua una determinata azione al ricevimento di un segnale.
+Alcune volte, l'azione di default e' terminare il processo, ma se si vuole semplicemente stampare un messaggio di avvenuta ricezione, si puo' modificare l'handler:
+
+
+```C
+#include <signal.h>
+
+int signo;
+void handler(int nsig){
+  printf("Segnale ricevuto\n");
+  signo = nsig;
+}
+```
+*Tramite l'handler, andremo a stampare un messaggio, e imposteremo signo a nsig, per comunque avere il valore del segnale ricevuto*
+
+
+
