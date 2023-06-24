@@ -136,4 +136,52 @@
 			L'identificatore consente al SO di *instradare le connessioni in arrivo* specificando un nome particolare di porta, al corretto processo Server. Tale nome e' assegnato tramite ```bind```. Il processo Server aspetta poi che un Client si connetta alla Socket, tramite ```listen```, e accetta la connessione tramite ```accept```.
 			All'esecuzione di ```accept```, viene creata una nuova socket, *distinta da quella dotata di nome*:
 				Questa socket viene usata *unicamente per parlare con il Client specifico*
-				
+				La socket *dotata di nome* resta disponibile per *eventuali ulteriori connessioni*
+				Se il codice del Server e' scritto in modo appropriato, *puo' trarre vantaggio da connessioni multiple*
+				Con un server semplice, gli altri Client *rimarranno in coda sulla listen* finche' il server non sara' di nuovo pronto
+			Il lato Client di un sistema basato su Socket e' piu' diretto.
+			Il client crea una socket tramite ```socket```, invoca ```connect``` per stabilire una connessione, usando la socket come indirizzo.
+		*Attributi delle Socket*
+			Le socket sono caratterizzate da *tre atttributi*:
+				1) *Dominio*
+				2) *Tipo* 
+				3) *Protocollo*
+				4) Esse hanno anche un *indirizzo*, usato come nome.
+			*Domini delle Socket*
+				I domini specificano *il mezzo della rete* che verra' usato nella comunicazione socket.
+				Il piu' comune e' *AF_INET*, che si riferisce all' *Internet Networking* 
+				Il protocollo sottostante, *Internet Protocol*, che ha solo una famiglia di indirizzi, impone un particolare modo di specificare i computer sulla rete : *l'IP*.
+				Sebbene i nomi si riferiscano quasi sempre a macchine sulla rete, essi sono tradotti in indirizzi *di basso livello* :
+					Un esempio di IP e' *192.168.1.99*
+					Quando un client si connette alla rete mediante una socket, necessita dell'IP del server
+				Possono esserci numerosi servizi su un server. Un Client puo' indirizzare un particolare servizio su una macchina usando una *porta IP*:
+					Nel sistema, una porta e' identificata internamente da un intero *unico a 16bit*, ed esternamente dalla combinazione di IP e numero di porta.
+					Le socket sono gli estremi della comunicazione, che devono essere *legati alle porte **prima** che avvenga la comunicazione*.
+				I server aspettano le connessioni su porte specifiche. A servizi noti sono allocati i numeri di porta *usati da tutte le macchine Linux e UNIX* :
+					Solitamente i numeri inferiori a 1024.
+					*rlogin(513), ftp(21),http(80)...*
+				Poiche' non c'e' un insieme standard di numeri porta per i servizi standard, i computer possono collegarsi facilmente fra loro *senza dover stabilire il corretto numero di porta*.
+				**I servizi locali possono usare indirizzi di porta non standard**.
+				Un altro dominio e' *AF_UNIX*, che puo' essere usato dalle socket sulla base di *un singolo computer*. In questo caso, il protocollo sottostante e' il file di I/O, e gli indirizzi sono nomi di file assoluti.
+				I domini specificati da POSIX.1 sono:
+					1) *AF_INET*
+					2) *AF_INET6*
+					3) *AF_UNIX*
+					4) *AF_UNSPEC*
+			*Tipi di Socket*
+				Un dominio socket puo' avere *diversi modi* per comunicare, ognuno dei quali potrebbe avere *caratteristiche differenti*:
+					Questo non e' un problema con le socket di dominio *AF_UNIX*, le quali forniscono *un affidabile percorso di comunicazione a due vie*
+					In domini di rete, e' necessario sapere *le caratteristiche della rete sottostante*
+				I protocolli internet forniscono due livelli distinti:
+				*Socket Stream*
+					Forniscono una connessione che e' un flusso di byte a due vie , *affidabile e sequenziato*.
+					E' *garantito* che i dati non siano persi, duplicati o riordinati *senza un'indicazione dell'occorrenza di un errore*.
+					I messaggi piu' grandi *sono frammentati, trasmessi e riassemblati*.
+					Le Socket Stream, *specificate dal tipo **SOCK_STREAM***, sono implementate nel dominio *AF_INET* dalle connessioni **TCP/IP**.
+				*Socket Datagram*
+					Specificate dal tipo **SOCK_DGRAM**, non stabiliscono *ne' mantengono* una connessione. C'e' anche un limite *sulla dimensione del datagramma da inviare*
+					E' trasmesso come *un messaggio di rete singolo* che puo' andar perso, duplicato, o arrivare fuori sequenza.
+					Le socket datagram sono implementate nel dominio *AF_INET* dalle connessioni **UDP/IP**.
+					Esse sono *poco costose in termini di risorse*, e sono *veloci*.
+
+------------------------------------------------------------------------
