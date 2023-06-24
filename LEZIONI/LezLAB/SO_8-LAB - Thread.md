@@ -83,6 +83,12 @@
 					*Staticamente* : Impostandola a *PTHREAD_COND_INITIALIZER*
 					*Dinamicamente* : Invocando `pthread_cond_init`
 				Successivamente, andra' usata `pthread_cond_destroy` se inizializzata dinamicamente.
-				*Attesa sulla condizione*
+				*Attesa/Segnalazioni sulla condizione*
 					Un thread che vuole attendere sulla condizione invoca `pthread_cond_wait`, e potra' attendere per un tempo indefinito. Se invece vuole attendere per un tot di tempo, usera' `pthread_cond_trywait`.
 					Quando la condizione si verifica, si puo' usare `pthread_cond_signal` per risvegliare *un thread* in attesa, oppure `pthread_cond_broadcast` per risvegliarli *tutti*.
+					Il mutex passato a `pthread_cond_wait` protegge la condizione:
+						1) Il chiamante lo passa bloccato alla condizione
+						2) La funzione pone il thread chiamante nella lista dei thread in attesa, e sblocca il mutex
+						3) Quando `pthread_cond_wait` ritorna, il mutex viene nuovamente sbloccato
+
+--------------------------------------------------------------------------
