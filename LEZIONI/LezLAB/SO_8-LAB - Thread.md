@@ -55,3 +55,34 @@
 	**MUTEX E VARCOND**
 		Quando molteplici thread di un processo condividono la stessa memoria, e' necessario che ciascun thread *mantenga la coerenza dei propri dati*.
 		Se ciascun thread usa variabili che gli altri non leggono o modificano, non vi e' alcun problema di consistenza. Se invece i thread leggono o modificano variabili condivise, si devono *sincronizzare* affinche' non vi siano race condition o problemi di consistenza dei dati.
+		*Quando un thread modifica una variabile, gli altri potenzialmente possono riscontrare inconsistenza nella lettura dei dati*.
+		**SINCRONIZZAZIONE THREAD**
+			*Mutex*
+				Un mutex e' un oggetto che permette a processi o thread di *sincronizzare l'accesso ai dati condivisi*. Un mutex ha due stati:
+					*Bloccato* : Gli altri thread che tentano di bloccarlo restano in attesa
+					*Libero* : Quando un thread rilascia il mutex, uno dei thread in attesa lo acquisisce.
+				Ogni volta che un thread ha bisogno di accedere a dati condivisi, acquisisce il mutex, e lo rilascia ad azione completata. In questo modo si previene l'inconsistenza dei dati.
+				Il mutex e' una variabile di tipo `pthread_mutex_t`, e si puo' inizializzare:
+					*Staticamente* : Impostandolo al valore costante *PTHREAD_MUTEX_INITIALIZER*
+					*Dinamicamente* : Invocando `pthread_mutex_init`
+				Se allochiamo dinamicamente il mutex, e' necessario richiamare `pthread_mutex_destroy` per liberare la memoria.
+				Per bloccare il mutex, si usa `pthread_mutex_lock`, oppure `pthread_mutex_trylock` se si vuole far decidere se ci sono alternative rispetto alla normale attesa.
+				Per sbloccare il mutex, si richiama `pthread_mutex_unlock` : 
+					Se vi e' piu' di un thread in attesa, *una politica di scheduling decide quale acquisira' il mutex*.
+				*Attributi del mutex*
+					Per default, un mutex puo' essere usato *solo da thread dello stesso processo*.
+					Utilizzando l'attributo *PTHREAD_PROCESS_SHARED*, si permette a thread di altri processi di usare il mutex. Gli oggetti attributo vanno inizializzati, ed infine distrutti per non sprecare memoria.
+			*Variabili di Condizione*
+				Le variabili di condizione costituiscono *un ulteriore meccanismo di sincronizzazione per i thread*. Mentre i mutex controllano l'accesso dei thread ai dati tramite *polling* (Interrogazione ciclica), le variabili di condizione permettono di *sincronizzare i thread sulla base dell'attuale valore dei dati*.
+				Una variabile di condizione e' *sempre associata ad un mutex lock*.
+				Le variabili di condizione hanno tre componenti : 
+					1) *Variabile Condizione* : Il meccanismo con cui il thread attende la condizione
+					2) *Mutex associato* : Il meccanismo che protegge il predicato
+					3) *Predicato* : Condizione o valore che il thread controlla
+				Prima di usare una variabile condizione, di tipo `pthread_cond_t`, e' necessario inizializzarla:
+					*Staticamente* : Impostandola a *PTHREAD_COND_INITIALIZER*
+					*Dinamicamente* : Invocando `pthread_cond_init`
+				Successivamente, andra' usata `pthread_cond_destroy` se inizializzata dinamicamente.
+				*Attesa sulla condizione*
+					Un thread che vuole attendere sulla condizione invoca `pthread_cond_wait`, e potra' attendere per un tempo indefinito. Se invece vuole attendere per un tot di tempo, usera' `pthread_cond_trywait`.
+					Quando la condizione si verifica, si puo' usare `pthread_cond_signal` per risvegliare *un thread* in attesa, oppure `pthread_cond_broadcast` per risvegliarli *tutti*.
