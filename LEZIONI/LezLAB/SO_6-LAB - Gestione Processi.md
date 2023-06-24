@@ -155,4 +155,64 @@
 		![[Pasted image 20230601101331.png]]
 		Un processo che riceve un segnale deve anche *chiedere al kernel che azione intraprendere*. L'azione che eseguirà è una fra *ignorare il segnale*, *eseguire l'azione di default* oppure *eseguire un handler* (**intercettare il segnale**). Solitamente l'azione di default fa terminare il processo, ma possono esserci situazioni diverse.
 	*Gestore Segnali*
-		
+		L'invocazione di un gestore puo' *interrompere il flusso principale di un programma* in qualsiasi momento. 
+		Il kernel invoca il gestore per conto del processo, e quando il gestore *ritorna*, **l'esecuzione del programma riprende nel punto in cui era stata interrotta dal gestore**.
+	*Segnali ed avvio dei programmi*
+		Quando un programma viene eseguito, l'azione di default associata a ciascun segnale e' quella di *default*, o di *ignorarlo*. Tutti i segnali sono impostati all'azione di default, *a meno che il processo che invoca exit stia ignorando il segnale*. 
+		I processi creati tramite fork *ereditano la disposizione dei segnali* dei genitori.
+		Un segnale intercettato in un processo **non puo' essere intercettato da un eseguibile avviato con exec**.
+	*Segnali Inaffidabili*
+		Nelle prime versioni di UNIX, i segnali erano inaffidabili, in quanto potevano andar persi. Un processo aveva poco controllo sul segnale. 
+		Talvolta ha senso *catturare* il segnale, ma non **ignorarlo**, in modo da poterne ricordare l'occorrenza.
+		Il processo non ha la possibilita' di bloccare il segnale quando si verifica, ma puo' al piu' ignorarlo. Ci sono casi in cui e' necessario prevenire, *ma ricordare*, l'occorrenza di un segnale.
+	*Rientranza delle Funzioni*
+		Non tutte le chiamate di sistema e le funzioni di libreria possono essere invocate con sicurezza dal gestore.
+		Per spiegare la *rientranza* delle funzioni, si deve capire a fondo la **differenza fra programmi mono e multi thread**:
+			1) I classici programmi UNIX hanno *un unico thread in esecuzione*:
+				La CPU elabora le istruzioni per un *singolo flusso logico di esecuzione* attraverso il programma.
+			2) In un programma *multithread*, ci sono piu' flussi logici indipendenti e *concorrenti* di esecuzione, all'interno dello stesso processo.
+			3) Il concetto di thread multipli d'esecuzione e' rilevante per programmi *che impiegano i gestori dei segnali*.
+		Un gestore puo' interrompere in modo *asincrono* l'esecuzione di un programma **in un qualunque istante temporale**. E' come se il programma e il gestore costituissero due thread di esecuzione indipendenti (**sebbene non concorrenti**) all'interno dello stesso processo.
+		Una funzione e' detta **rientrante** se *puo' essere eseguita **simultaneamente** in modo sicuro da piu' thread di esecuzione nello stesso processo*:
+			Se la funzione ottiene i risultati previsti *indipendentemente dallo stato d'esecuzione di qualsiasi altro thread*.
+		Una funzione e' invece detta **non rientrante** se la mutua esclusione alla funzione dev'essere assicurare tramite uso di semafori o disabilitando le interruzioni durante le sezioni critiche.
+			In generale, le funzioni **non rientranti**:
+				1) Invocano *malloc* e/o *free*
+				2) E' noto che usano strutture dati *statiche*
+				3) Sono parte della libreria *stdio*
+			Le funzioni *rientranti*:
+				1) *Non mantengono dati statici* in chiamate successive
+				2) *Non restituiscono puntatori a dati statici*, ma sono tutti passati da chi invoca la funzione
+				3) *Usano dati locali* o assicurano protezione a quelli globali *effettuandone copie locali*
+				4) *Non richiamano funzioni non rientranti*
+	*Segnali Affidabili*
+		E' necessario prendere precauzioni all'interno della funzione di gestione del segnale, *per evitare race condition*. UNIX contiene caratteristiche che permettono di bloccare l'eventuale elaborazione dei segnali:
+			*Maschera dei segnali*
+				La maschera dei segnali *maschera* alcuni segnali per evitare che alcuni (a bassa priorita', oppure alcuni scelti dall'utente) arrivino a bloccare l'esecuzione del processo.
+				Tipicamente i segnali possono essere messi in corrispondenza con ciascun bit di un intero. *il numero di segnali differenti che possono occorrere puo' superare il numero di bit in un intero*. POSIX definisce il tipo di dato **sigset_t** per contenere un insieme di segnali ed un insieme di funzioni per manipolarlo.
+			*Interruzione e Riavvio di syscall*
+				Immaginiamo di definire un handler per un certo segnale, e di effettuare una chiamata bloccante (*es read che si blocca finche' non riceve un dato input*). Mentre la syscall e' bloccata, il segnale per cui abbiamo ricevuto il gestore e' consegnato, ed e' invocato il gestore.
+				**Cosa accade quando il gestore ritorna?**
+				Di default, la syscall fallirebbe con errore **EINTR (*Interrupted Function)***, ma spesso preferiamo continuare l'esecuzione della syscall interrotta.
+				Per fare cio', possiamo usare del codice per *riavviare una system call interrotta da un gestore di un segnale*.
+				Dobbiamo comunque ricordarci che *svolgendo queste operazioni dobbiamo comunque **gestire l'errore EINTR** della syscall*.
+	*Segnali per il controllo dei Job*
+		*Gruppi di processi*
+			Ogni processo e' membro di un *gruppo di processi*. Un gruppo di processi ha associato un identificatore **PGID** (*Process Group ID*).
+			Un processo figlio eredita il PGID del padre.
+			Ad ogni processo puo' essere associato un *terminale di controllo, che tipicamente e' il terminale da cui il processo viene lanciato*.
+			Ad ogni terminale e' associato un *processo di controllo*:
+				1) Se il terminale individua un **metacarattere**, come *Ctrl+C*, spedisce il segnale appropriato a *tutti i processi nel gruppo del suo processo di controllo*
+				2) Se un processo tenta di leggere dal suo terminale, e *non e' membro del gruppo del processo di controllo di quel terminale*, riceve un segnale **SIGTTIN** che normalmente lo sospende (**SIGTTOU** se invece cerca di scriverci)
+		*Gruppi e Terminale : uso nella Shell*
+			All'avvio di una shell interattiva, la shell e' il processo di controllo del terminale da cui e' lanciata.
+			Se la shell esegue un comando in *foreground*:
+				1) La shell figlio si mette in un diverso gruppo, *assume il controllo del terminale*, ed esegue il comando
+				2) Ogni segnale generato dal terminale *viene indirizzato al comando* e non alla shell originaria 
+				3) Quando il comando termina, *la shell originaria riprende il controllo del terminale*.
+			Se la shell esegue un comando in *background*:
+				1) La shell figlio si mette in un gruppo diverso ed esegue il comando, *senza assumere il controllo del terminale*.
+				2) Ogni segnale generato dal terminale *continua ad essere indirizzato alla shell originaria*
+				3) Se il comando in background tenta di leggere dal suo terminale di controllo, *viene sospeso da un segnale **SIGTTIN***
+
+-----------------------------------------------------------------------------------------
