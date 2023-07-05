@@ -1,0 +1,62 @@
+
+-----------------------------------------------------------------------------------------
+
+**SHELL SCRIPTING**
+---
+*Script di Shell*
+	Lo *shell scripting* è una pratica in cui si va a scrivere codice per la shell, che viene chiamato *script*, basati su combinazioni di comandi tipici offerti dal sistema operativo.
+	I file contenenti istruzioni e i comandi di shell sono caratterizzati dall'**eseguibilità** :
+		*Il permesso d'esecuzione dev'essere abilitato*, in modo da poter essere eseguito dal sistema operativo.
+	Nei sistemi GNU/LINUX è possibile *programmare* la shell, cioè creare programmi per eseguire automaticamente operazioni che normalmente andrebbero eseguite a mano.
+	Tutti i file di script hanno estensione *.sh*, e una volta redatto lo script è possibile impostarne il permesso d'esecuzione tramite `chmod +x <file>` , e successivamente si potrà procedere all'esecuzione con `./<file>`
+	Uno shell script può contenere:
+		1) Righe di comando, identificate da *#*
+		2) Una prima riga di commento speciale, che indica quale shell usare, *#!/bin/bash*
+		3) Comandi Linux
+	La shell legge riga per riga ed in ordine tutti i comandi elencati nello script, ed esegue tutte le istruzioni che incontra, saltando i commenti, che iniziano con *#*.
+	Nella shell esistono variabili predefinite, dette **built-in**, e le variabili definite dall'utente, dette **d'ambiente**. Il contenuto delle variabili è utilizzabile tramite l'operatore *$*, ad es : 
+		`var = 5`
+		`echo $var`
+	Alcune variabili built-in nella shell sono:
+		*#* : Il numero di argomenti dati allo script/alla funzione
+		*?* : Exit status del processo precedente
+		*$* : Process ID del processo di shell
+		*!* : Process ID dell'ultimo comando eseguito
+		*0* : nome della shell o dello script di shell
+		*BASH* : Il pathname completo per invocare la bash
+		*BASH_VERSION* : La versione dell'istanza della shell usata
+		*USER* : Nome dell'utente corrente
+		*HOME* : Nome della directory home corrente
+	Una variabile può contenere anche *stringhe*, come ad esempio `stringa = scatola` o `stringa = 'centro direzionale'`
+	I caratteri *< > & $ |* sono esempi di caratteri speciali, che hanno significati particolari per la shell. Talvolta è necessario usare i caratteri in modo *letterale*, senza far riferimento al loro significato speciale, usando il *quoting*, cioè ad esempio `&stringa`.
+
+*Comandi*
+	`echo`
+		Il comando echo si occupa di stampare a schermo una variabile.
+		`echo "ciao"` stamperà a schermo la stringa "ciao"
+		`echo $x` stamperà a schermo il contenuto della variabile x
+	`read`
+		Il comando read si occupa di leggere l'input e salvarlo in una variabile.
+		`read qualcosa` leggerà lo stdin e salverà il contenuto nella variabile *qualcosa*
+	`&`
+		Il comando & *redirige un canale ad un altro*
+		`2>&1` redirige lo stderr nello stdout
+	`Processi e Job`
+		Ogni processo in UNIX/Linux è identificato dal PID. La shell definisce i comandi eseguiti dall'utente come *job*, per distinguerli dai processi di sistema. 
+		Un qualsiasi processo viene eseguito in foreground, ma se si tratta di un processo che richiede un'elaborazione molto lunga, conviene eseguirlo in *background*, tramite il comando `<comando>&` .
+		Per riportare in foreground un processo o un job, basta usare `fg %<ID>`. Per portare in background un processo è anche possibile usare `bg &<ID>`, sospendendolo precedentemente.
+		Per sospendere un processo basta usare il carattere speciale `Ctrl+Z`
+	`more` 
+		Serve a visualizzare più testo di quello contenuto nella finestra della shell, che non riesce a mostrarlo tutto
+	`less`
+		Versione migliorata del comando more, permette anche di scorrere fra le pagine
+	`wc` 
+		*Word Count*, effettua un conto delle parole, separando le stringhe in token con delimitatore spazio.
+		Opzioni:
+			`wc -w` : Conta le parole
+			`wc -l` : Conta le linee (righe)
+			`wc -c` : Conta i caratteri
+	`head/tail`
+		Questi comandi servono a mostrare le prime/ultime N linee di un file. `head 10 <file>` mostra le *prime* 10 linee, `tail 10 <file>` le ultime 10.
+	**Costrutti di programmazione della BASH**
+		
