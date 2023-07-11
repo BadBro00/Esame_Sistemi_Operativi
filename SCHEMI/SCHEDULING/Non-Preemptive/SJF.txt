@@ -1,3 +1,29 @@
+                                                      ||SCHEDULING Shortest Job First||
+======================================================================================================================================================
+                                                        Politica di Scheduling in cui:
+
+      1) I processi entrano nel sistema in base al loro tempo di arrivo
+      2) Nessun processo è prelazionabile, essendo lo SJF un tipo di scheduling Non-Preemptive
+      3) L'ordine di schedulazione dei processi è quello definito dal tempo di servizio
+      4) Una volta schedulato, un processo arriva sempre a completamento
+      
+=====================================================================================================================================================
+
+                                                    DIFFICOLTA' : 1
+                                                    
+                    Questa politica di Scheduling è molto facile, difatti si schedula sempre il processo che ha minor Tserv.
+                    
+        1) Non essendo preemptive, se abbiamo 4 processi che necessitano di poco CPU burst *prima di un processo che ne richiede molto*, verranno comunque
+              schedulati prima, e quindi il processo subirà "Starvation", inoltre si va a perdere molto tempo che potrebbe essere impiegato meglio con altre
+              politiche di Scheduling
+        2) Il tempo di CPU usato da ciascun processo può essere molto lungo, quindi si perde il tempo perchè se tutti i processi impiegano 10ms di CPU,
+              si potrebbe usare una politica di scheduling che fa usare ciclicamente 2 ms di CPU per ciascun proceso, per cui contando anche il Context Switch,
+              i tempi migliorerebbero rispetto all'SJF.
+        3) Dato l'ordine predefinito della coda, durante la schedulazione di molti processi brevi, potrebbe arrivare un processo lungo ma importante,
+              e non verrebbe schedulato fino al completamento del primo, causando quindi ritardi e rendendo il sistema poco apprezzabile dagli utenti.
+              
+=====================================================================================================================================================
+
 La politica di Scheduling Shortest Job First seleziona il processo che richiede meno CPUb per essere schedulato.
 Questa politica favorisce i processi brevi, ma causa Starvation nei processi lunghi.
 
