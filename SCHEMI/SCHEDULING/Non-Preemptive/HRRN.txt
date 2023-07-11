@@ -1,8 +1,26 @@
-Lo scheduling Highest Response Ratio Next e' una politica di Scheduling in cui viene sempre schedulato il processo che ha rapporto:
-                                              Rr = (Tatt+Tserv)/Tserv
-maggiore. Il rapporto viene sempre calcolato ad ogni CS, che essendo non preemptive la politica, si traduce in ogni conclusione del processo schedulato.
+                                            ||SCHEDULING Highest Response Ratio Next||
+======================================================================================================================================================
+Politica di Scheduling in cui:
 
+      1) I processi entrano nel sistema in base ai loro tempi d'arrivo
+      2) Nessun processo è prelazionabile, non essendo l'HRRN un tipo di scheduling Preemptive
+      3) Può essere applicata la Priorità, ma viene comunque prima l'ordine prestabilito dal Response Ratio.
+      4) Una volta schedulato, un processo arriva sempre a completamento.
+      
+=====================================================================================================================================================
 
+                                                    DIFFICOLTA' : 2
+                                                    
+                    Questa politica di Scheduling è molto semplice, ma bisogna stare attenti a una piccola cosa:
+                    
+        1) I processi vengono schedulati in base all'ordine definito dal Response Ratio : Rr = (Tatt+Tserv)/Tserv,
+              e viene schedulato sempre il processo che ha Rr maggiore
+        2) A parità di Rr, viene schedulato sempre il processo che *non è stato schedulato da più tempo*, ovvero quello che era arrivato prima.
+        3) Uno dei problemi di questo scheduling è che non si basa sulla priorità, ma fa affidamento al rapporto,
+              definito unicamente dai valori di tempo d'attesa o tempo di servizio.
+              Per questo motivo, potrebbe arrivare un processo con più importanza e non essere schedulato, anche per molto tempo, causando problemi nel sistema.
+        4) Il rapporto viene sempre calcolato ad ogni CS, che essendo non preemptive la politica, si traduce in ogni conclusione del processo schedulato.
+=====================================================================================================================================================
 
                                                                 ||SCHEMA||
            P           Tarr          Tserv 
