@@ -113,4 +113,50 @@
 				` pattern [ |pattern ] ... comandi;;`
 				`esac`
 			*Ciclo While*
-				
+				Il ciclo while negli shell script ha una forma del tipo:
+					`while condizione do`
+						`comandi`
+					`done`
+				Un esempio è il seguente:
+					`var = 0`
+					`while["$var" -lt 10]`
+					`do`
+						`echo -n "$var"`
+						`var = 'expr $var + 1' `
+					`done`
+				Il comando *expr* consente l'esecuzione di comandi aritmetici, ma l'esecuzione è lenta, poichè invocata una nuova shell per eseguire il comando
+				Un'alternativa è l'*espansione* `$((...))` : Racchiudendo la variabile in queste parentesi, siamo in grado di ottimizzare l'efficienza delle operazioni aritmetiche più semplici.
+			*Ciclo for*
+				Il costrutto for consente di ciclare attraverso un range di valori, rappresentato da un qualsiasi insieme di stringhe:
+					`for X in 1 2 3 4 5`
+					`do`
+						`echo $X`
+					`done`
+			*Funzioni*
+				Una funzione è una sorta di script nello script. Si usa per assegnare un nome a porzioni di codice e conservarle in memoria.
+				La sintassi per definire le funzioni è molto simile ai linguaggi di alto livello:
+					`nome_funzione(){`
+						`istruzioni`
+					`}`
+				Una volta creata, può essere richiamata usando `nomefunzione(argomenti)`.
+				Le funzioni non sono eseguite in processi separati, mentre gli script sì. Se una funzione ha lo stesso nome di uno script o un eseguibile, *la funzione ha la precedenza*.
+				Un esempio è il seguente:
+					`tot_iva(){`
+						`IVA = $(($1*20))`
+						`IVA = $(($IVA/100))`
+						`TOT = $(($1+$IVA))`
+						`echo $TOT`
+					`}`
+					Dove $1 si riferisce al parametro passato dallo script che eseguirà la funzione
+					Un esempio di run è:
+						`DVD = 7`
+						`BRAY = 12`
+						`echo "Prezzo DVD+IVA: $(tot_iva $DVD) euro"`
+						`echo "Prezzo BRAY+IVA: $(tot_iva $BRAY) euro"`
+						->	`"Prezzo DVD+IVA: 8 euro"`
+							`"Prezzo BRAY+IVA: 14 euro"`
+				Le funzioni possono ritornare valori numerici tramite il comando *return*. Se non è specificato return, la funzione restituisce *lo stato d'uscita dell'ultimo comando eseguito*.
+				Il modo per ritornare una stringa invece è semplicemente memorizzarla in una variabile che verrà usata dopo la terminazione della funzione.
+-----------------------------------------------------------------------------------------
+
+FINE SO
