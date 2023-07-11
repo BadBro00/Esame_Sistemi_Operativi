@@ -59,4 +59,58 @@
 	`head/tail`
 		Questi comandi servono a mostrare le prime/ultime N linee di un file. `head 10 <file>` mostra le *prime* 10 linee, `tail 10 <file>` le ultime 10.
 	**Costrutti di programmazione della BASH**
-		
+		Alcune variabili sono *built-in*:
+			1) *$HOME* : Home directory dell'utente
+			2) *$PATH* : Lista di dierctory, separate da : per la ricerca di comandi
+			3) *$PS1* : Prompt dei comandi, solitamente $
+			4) *$PS2* : Prompt secondatrio, solitamente >
+			5) *$ISF* : Separatore campi di Input
+			6) *$0* : Nome script
+			7) *$#* : Numero di parametri passati
+			8) *$ $* : PID del processo script
+		Se lo script è invocato con parametri, sono create alcune *variabili aggiuntive*:
+			1) *$1,$2,...* : Parametri forniti
+			2) $* : Lista di *tutti* i parametri, mostrata in una singola variabile, separata dall'IFS
+			3) *$@* : Sottile variante di * che non usa l'IFS
+	*Condizioni*
+		Uno shell script può testare il codice d'uscita di qualsiasi comando, inclusi gli script utente. Ragion per cui è sempre consigliato usare un `exit` alla fine dei propri script.
+		*Test*
+			Molti script fanno un uso estensivo del comando `test` oppure del comando `[`, e con quest ultimo va usato anche `]` per questioni di leggibilità.
+		*Condizioni sui file*
+			1) *-d* : Vero se è DIR
+			2) *-e* : Vero se esiste
+			3) *-f* : Vero se è REG
+			4) *-g* : Vero se set-group-id è 1
+			5) *-r* : Vero se è leggibile
+			6) *-s* : Vero se file ha dim>0
+			7) *-u* : Vero se set-user-id è 1
+			8) *-w* : Vero se file è scrivibile
+			9) *-x* : Vero se file è eseguibile
+		*Strutture di Controllo*
+			*If/then - Else*
+				Il costrutto if/then-else è molto simile all'if/else della programmazione, ma si basa su una particolarità : quando la condizione è vera si accede alla parte definita dal *then*.
+				`if {"$Risposta" = "ciao"}`
+				`then`
+				`  echo "Giusto"`
+				`else`
+				` echo "Errato"`
+				`fi`
+				Il comando *fi* chiude l'if, è da intendere come *end if*.
+			*elif*
+				Un comando simile è `elif`, che consente di *innestare* condizioni ad un costrutto if/then-else
+				`if {"$ANNI" -lt 10}`
+				`then`
+				`  echo "Bambino"`
+				`elif{"$ANNI" -lt 18}`
+				`then`
+				` echo "Minorenne"`
+				`else`
+				`echo "Maggiorenne"`
+				`fi`
+			*Costrutto Condizionale*
+				Il costrutto condizionale è simile allo *Switch*, in cui si deve avere un caso **fra vari casi diversi possibili**.
+				`case variable in`
+				` pattern [ |pattern ] ... comandi;;`
+				`esac`
+			*Ciclo While*
+				
