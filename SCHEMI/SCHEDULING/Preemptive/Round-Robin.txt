@@ -1,11 +1,27 @@
-La politica di Scheduling Round Robin prevede di concedere l'utilizzo della CPU (e quindi fornire CPUburst) a ciascun processo, secondo una time-slice.
-La time-slice e' il periodo massimo di tempo in cui un processo puo' utilizzare la CPU, e viene chiamato quanto.
-Oltre cio', e' previsto un certo tempo per il Context Switch, ovvero il cambio di contesto di un processo,
-che va considerato come "quanti quadratini lasciare dalla fine del processo".
+                                                       ||SCHEDULING Round-Robin||
+======================================================================================================================================================
+                                                     Politica di Scheduling in cui:
 
-La politica di Scheduling Shortest Job First seleziona il processo che richiede meno CPUb per essere schedulato.
-Questa politica favorisce i processi brevi, ma causa Starvation nei processi lunghi.
+      1) I processi entrano nel sistema, e vengono schedulati *un pò per uno*
+      2) Tutta la politica si basa sul *quanto* q, che indica *quanto tempo può essere schedulato ogni processo*
+      3) Alla fine del quanto, od al completamento del processo, verrà effettuato il *Context Switch*, ovvero verrà cambiato il processo schedulato.
+      4) Sia il quanto q che il CS vengono definiti prima (i.e. nella traccia), ed in base a questi due valori si avrà un risultato diverso di scheduling.
+=====================================================================================================================================================
 
+                                                          DIFFICOLTA' : 5
+                                                    
+                    Questa politica di Scheduling è facile da comprendere, ma è difficile da applicare:
+                    
+        1) La principale difficoltà sta nel gestire bene la coda dei processi, quale viene schedulato, per quanto ecc.
+        2) Il quanto è sempre >= 1 ms, mentre il CS può essere anche di 0ms. La principale problematica è quella di capire quale processo va schedulato 
+==========================================================================================================================================================
+        La politica RR è la più *lunga* da applicare, essendo che i tempi di schedulazione saranno molto gonfiati, ma effettivamente è una delle migliori,
+           garantendo buoni tempi e buoni progressi per tutti i processi.
+        La difficoltà è data da tutte le informazioni da tenere a mente, ma una volta capito bene l'algoritmo di scheduling, è facilmente applicabile,
+           in quanto basta tenere traccia del tempo di schedulazione di ciascuno, e l'ordine con cui i processi entrano nel sistema.
+==========================================================================================================================================================
+                                                        Facendo riferimento alla seguente tabella:
+          
                                    ||SCHEMA||
            P           Tarr          Tserv 
           P1            0              3
@@ -15,7 +31,7 @@ Questa politica favorisce i processi brevi, ma causa Starvation nei processi lun
           P5            8              3
           
           
-In base a questa tabella, e considerando q = 1ms, abbiamo che:
+                Considerando q = 1ms e un CS di 0ms, abbiamo che:
       
       t = 0ms => P1 e' l'unico processo, e viene schedulato
       t = 2ms => Arriva P2, avviene il CS
