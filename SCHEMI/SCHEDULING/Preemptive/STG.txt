@@ -1,9 +1,22 @@
-La politica di scheduling Shortest Time to Go seleziona sempre il processo che richiede meno CPUb per essere completato.
-E' la versione preemptive del SJF, ed essendo preemptive, quando arriva un processo con CPUb minore, viene schedulato quest'ultimo.
-Ma, come lo SJF, favorisce i processi brevi, e causa Starvation in quelli lunghi.
+                                                     ||SCHEDULING Shortest Time to Go||
+======================================================================================================================================================
+                                                         Politica di Scheduling in cui:
 
-La politica di Scheduling Shortest Job First seleziona il processo che richiede meno CPUb per essere schedulato.
-Questa politica favorisce i processi brevi, ma causa Starvation nei processi lunghi.
+      1) I processi entrano nel sistema in base al loro tempo d'arrivo, e viene calcolato *quanto tempo manca al loro completamento*
+      2) Viene sempre schedulato il processo *cui manca meno CPUb per essere completato*
+      3) A differenza del SJF, questo algoritmo è preemptive e quindi il processo schedulato può essere prelazionato; a differenza invece dell'LCN,
+           si va semplicemente a guardare il Tserv, ovvero quanti ms dev'essere schedulato il processo per essere completato.
+      
+=====================================================================================================================================================
+                                                              DIFFICOLTA' : 3
+                                                    
+                                Questa politica di Scheduling è molto facile da capire ed applicare:
+                    
+        1) Il tutto si basa sullo scegliere il processo *che richiede meno Tserv*, ovvero meno ms di CPU per essere completato.
+        2) Essendo la politica preemptive, il cambio di processo può avvenire a termine del processo oppure all'arrivo di un nuovo processo
+              
+=====================================================================================================================================================
+
 
                                    ||SCHEMA||
            P           Tarr          Tserv 
