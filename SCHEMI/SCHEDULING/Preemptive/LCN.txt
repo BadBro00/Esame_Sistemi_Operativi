@@ -1,10 +1,22 @@
-La politica di Scheduling Least Completed Next schedula sempre il processo che ha utilizzato il minor tempo di CPU (non quello che ha meno tempo per finire).
-In caso di uguaglianza, seleziona il processo non schedulato per piu' tempo.
-Anche questa politica causa la Starvation dei processi lunghi, ma fornisce uguali progressi per entrambi i tipi di Processi. 
-Infine, trascura i processi esistenti quando arriva un nuovo processo, che ha usato meno CPU, e per questo motivo anche i processi "medi" soffrono di Starvation.
+                                                  ||SCHEDULING Least Completed Next||
+======================================================================================================================================================
+                                                     Politica di Scheduling in cui:
 
-La politica di Scheduling Shortest Job First seleziona il processo che richiede meno CPUb per essere schedulato.
-Questa politica favorisce i processi brevi, ma causa Starvation nei processi lunghi.
+      1) I processi entrano nel sistema, e vengono schedulati in base al tempo che *manca al loro completamento*
+      2) Essendo la politica Preemptive, quando avremo un caso di parità, può succedere che venga prelazionato in favore dell'altro
+      3) L'ordine di schedulazione è sempre quello di schedulare il processo che ha *Tserv-CPUb maggiore*      
+=====================================================================================================================================================
+
+                                                          DIFFICOLTA' : 3
+                                                    
+                    Questa politica di Scheduling è facile da applicare, ma presenta alcune difficoltà:
+                    
+        1) La principale difficoltà sta nel capire che viene schedulato sempre *il processo cui manca più CPUb per essere completato*.
+        2) Essendo preemptive, questo calcolo si fa ogni volta che si ha un pareggio di tempo per due o più processi, o quando ne viene completato uno.
+        3) Lo scheduling funziona abbastanza bene, fornendo eguali progressi per tutti i processi, anche se rimane comunque la Starvation dei processi lunghi.
+        4) La principale pecca di questo algoritmo è che *trascura i processi esistenti* quando entra un nuovo processo,
+              dato che il nuovo processo spesso avrà bisogno di più tempo per essere completato, e quindi verrà schedulato subito.
+=====================================================================================================================================================
 
                                    ||SCHEMA||
            P           Tarr          Tserv 
