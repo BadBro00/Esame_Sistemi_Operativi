@@ -1,4 +1,5 @@
 /*
+[INCOMPLETO -> CON ERRORI]
 Scrivere un programma che, preso in input un file completo di percorso, restituisca lo UID del proprietario, la grandezza del file e tutti i permessi.
 */
 
