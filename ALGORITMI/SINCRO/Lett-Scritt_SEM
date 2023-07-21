@@ -1,0 +1,116 @@
+//PREF LETT
+var 
+  totread,totwrite,runwrite,runread : integer
+  reading,writing : semaphore
+  sem_CS : semaphore
+begin
+  totread := 0
+  totwrite := 0
+  runread := 0
+  runwrite := 0
+//Lettore
+Parbegin
+  repeat
+    wait(sem_CS)
+    totread := totread+1
+    if runwrite = 0 then
+      runread := runread+1
+      signal(reading)
+    signal(sem_CS)
+    wait(reading)
+    {leggi}
+    runread := runread-1
+    totread := totread-1
+    if runread=0 AND totwrite>runwrite then
+        runwrite := 1
+        signal(writing)
+    seignal(sem_CS)
+  forever
+Parend
+//Scrittore
+Parbegin
+  repeat
+    wait(sem_CS)
+    totwrite := totwrite+1
+    if(runread=0 AND runwrite=0) then
+      runwrite := 1
+      signal(writing)
+    wait(writing)
+    {Scrivi}
+    runwrite := runwrite-1
+    totwrite := totwrite-1
+    while(runread < totread) do
+    begin
+      runread := runread+1
+      signal(reading)
+    end
+    if(runread = 0 AND totwrite>runwrite) then
+      runwrite := 1
+      signal(writing)
+    signal(sem_CS)
+  forever
+Parend
+------------------------------------------------------------------
+Lettore e Scrittore aumentano di uno il proprio tot
+I lettori controllano se non ci sono scrittori in esecuzione, e nel caso avviano la propria lettura (rr 15-17)
+Gli scrittori controllano se non ci sono lettori E SCRITTORI in esecuzione, nel caso partono (rr 34-36)
+Una volta che i processi hanno esaurito il proprio compito, decrementano di uno run e tot, e controllano in ordine:
+  LETTORE                         SCRITTORE
+  Se non ci sono lettori          Se ci sono lettori in attesa di leggere
+  Se ci sono scrittori in attesa  Se non ci sono lettori
+                                  Se ci sono scrittori in attesa di leggere
+Questo ordine favorisce i lettori, che leggeranno i dati scritti dagli scrittori prima che questi ultimi possano ripartire.
+
+Se volessimo favorire gli SCRITTORI, dovremmo modificare e spostare il while
+//PREF SCRITT
+var 
+  totread,totwrite,runwrite,runread : integer
+  reading,writing : semaphore
+  sem_CS : semaphore
+begin
+  totread := 0
+  totwrite := 0
+  runread := 0
+  runwrite := 0
+//Lettore
+Parbegin
+  repeat
+    wait(sem_CS)
+    totread := totread+1
+    if runwrite = 0 then
+      runread := runread+1
+      signal(reading)
+    signal(sem_CS)
+    wait(reading)
+    {leggi}
+    runread := runread-1
+    totread := totread-1
+    while(runwrite < totwrite) do
+    begin
+      runwrite := 1
+      signal(writing)
+    end
+    if runread=0 AND totwrite>runwrite then
+        runwrite := 1
+        signal(writing)
+    seignal(sem_CS)
+  forever
+Parend
+//Scrittore
+Parbegin
+  repeat
+    wait(sem_CS)
+    totwrite := totwrite+1
+    if(runread=0 AND runwrite=0) then
+      runwrite := 1
+      signal(writing)
+    wait(writing)
+    {Scrivi}
+    runwrite := runwrite-1
+    totwrite := totwrite-1
+    if(runread = 0 AND totwrite>runwrite) then
+      runwrite := 1
+      signal(writing)
+    signal(sem_CS)
+  forever
+Parend
