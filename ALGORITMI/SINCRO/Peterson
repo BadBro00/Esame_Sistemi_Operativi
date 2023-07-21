@@ -1,0 +1,22 @@
+//2 PROCESSI
+var 
+  flag : array[0...1] of boolean
+  turn : 0...1
+begin
+  flag[0] := false
+  flag[1] := false
+Parbegin
+  repeat
+    flag[0] := true
+    turn := 1
+    while(flag[1] AND turn = 1) do {niente}
+    {CS}
+    flag[0] := false
+    {resto ciclo}
+  forever
+Parend
+-----------------------------------------------
+L'algoritmo usa un array di flag booleane per indicare quale proc *vuole entrare* in CS
+turn decide quale proc *puo'* entrare
+Finche' non tocca a me (turn == i), attendo
+Una volta effettuata la CS, imposto la mia flag a false e continuo
