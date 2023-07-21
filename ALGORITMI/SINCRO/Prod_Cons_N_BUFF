@@ -1,0 +1,34 @@
+type item = ...
+const N = ...
+var
+  buffer : array[0...N-1] of item
+  full : semaphore := 0
+  empty : semaphore := N
+  prod_ptr,cons_ptr : integer
+begin
+  prod_ptr := 0
+  cons_ptr := 0
+//Prod
+Parbegin
+  repeat
+    wait(empty)
+    buffer[prod_ptr] := ...
+    prod_ptr := prod_ptr + 1 mod N
+    signal(full)
+    {resto ciclo}
+  forever
+Parend
+//Cons
+Parbegin
+  repeat
+    wait(full)
+    x := buffer[cons_ptr]
+    cons_ptr := cons_ptr + 1 mod N
+    signal(empty)
+    {resto ciclo}
+  forever
+Parbegin
+-----------------------------------------------------
+Utilizziamo due ptr, cons_ptr e prod_ptr, che sono gli indici per navigare gli N buffer da parte del prod e del cons
+Una volta che il produttore o il consumatore svolgono il lavoro, aumentano il ptr di 1modN cosi' da rendere l'array CIRCOLARE
+empty e full sono semafori contatori che indicano quanti buffer pieni e vuoti abbiamo
