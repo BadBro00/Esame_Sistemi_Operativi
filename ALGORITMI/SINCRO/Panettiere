@@ -1,0 +1,31 @@
+const n = ...;
+var
+  choosing : array[0...n-1] of boolean
+  number : array[0....n-1] of number
+begin
+  for i=0 to n-1
+    choosing[i] = false
+    number[i] = 0
+Parbegin
+  //Proc[i]
+  repeat
+    choosing[i] = true
+    number[i] = max(number[0],....,number[n-1])+1
+    choosing[i] = false
+    for j=0 to n-1
+      begin
+        while(choosing[j]) do {niente}
+        while(choosing[j] AND (number[j],j) < (number[i],i)) do {niente}
+      end
+    {CS}
+    number[i]=0
+    {resto}
+  forever
+  //Proc[j]
+Parend
+
+----------------------------------------------------------------------------
+Basato sulla coda di un panettiere/supermercato
+Scelgo nuumero (uno in piu' rispetto al precedente)
+Appena tutti hanno numero, finche' non e' il mio turno (se ci sono numeri piu' piccoli del mio), attendo
+Quando e' il mio turno, faccio cio' che devo e poi imposto il num a 0 ("tolgo" il mio numero dalla coda)
