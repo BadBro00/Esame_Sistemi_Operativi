@@ -59,58 +59,39 @@ Una volta che i processi hanno esaurito il proprio compito, decrementano di uno 
   Se non ci sono lettori          Se ci sono lettori in attesa di leggere
   Se ci sono scrittori in attesa  Se non ci sono lettori
                                   Se ci sono scrittori in attesa di leggere
-Questo ordine favorisce i lettori, che leggeranno i dati scritti dagli scrittori prima che questi ultimi possano ripartire.
+======================================================================================================================
+//PRIO SCRITTORI
+program lettori_scrittori;
+var
+	numlettori,numscrittori : integer;
+	&mutex1,&mutex2 : semaforo (:=1);
+	&UnoAllaVolta : semaforo (:=1);
+	&scrittura,&lettura : semaforo (:=1);
+procedure lettore;                          procedure scrittore;
+begin                                       begin
+	repeat                                     repeat
+		wait(UnoAllaVolta);                        wait(mutex1);
+		wait(lettura);                             numscrittori++;
+		wait(mutex2);                              if(numscrittori == 1) then
+		numlettori++;                              wait(lettura);
+		if(numettori==1) then                      signal(mutex1);
+			wait(scrittura);                       wait(scrittura);
+		signal(mutex2);                            //SCRIVI:
+		signal(lettura);                           signal(scrittura);
+		signal(UnoAllaVolta);                      wait(mutex1);
+		//LEGGI:                                   numscrittori--;
+		wait(mutex2);                              if(numscrittori == 0) then
+		numettori--;                               signal(lettura);
+		if(numlettori == 0) then                   signal(mutex1);
+			signal(scrittura);                forever;
+		signal(mutex2);                     end;
+	forever;
+end; 
 
-Se volessimo favorire gli SCRITTORI, dovremmo modificare e spostare il while
-//PREF SCRITT
-var 
-  totread,totwrite,runwrite,runread : integer
-  reading,writing : semaphore
-  sem_CS : semaphore
 begin
-  totread := 0
-  totwrite := 0
-  runread := 0
-  runwrite := 0
-//Lettore
-Parbegin
-  repeat
-    wait(sem_CS)
-    totread := totread+1
-    if runwrite = 0 then
-      runread := runread+1
-      signal(reading)
-    signal(sem_CS)
-    wait(reading)
-    {leggi}
-    runread := runread-1
-    totread := totread-1
-    while(runwrite < totwrite) do
-    begin
-      runwrite := 1
-      signal(writing)
-    end
-    if runread=0 AND totwrite>runwrite then
-        runwrite := 1
-        signal(writing)
-    seignal(sem_CS)
-  forever
-Parend
-//Scrittore
-Parbegin
-  repeat
-    wait(sem_CS)
-    totwrite := totwrite+1
-    if(runread=0 AND runwrite=0) then
-      runwrite := 1
-      signal(writing)
-    wait(writing)
-    {Scrivi}
-    runwrite := runwrite-1
-    totwrite := totwrite-1
-    if(runread = 0 AND totwrite>runwrite) then
-      runwrite := 1
-      signal(writing)
-    signal(sem_CS)
-  forever
-Parend
+	numlettori,numscrittori := 0;
+	Parbegin
+		lettore:
+		scrittore:
+	Parend;
+end;
