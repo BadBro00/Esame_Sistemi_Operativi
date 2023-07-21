@@ -1,0 +1,24 @@
+var
+  turn = 1...2
+  c1,c2 = 0...1
+begin
+  c1 := 1
+  c2 := 1
+  turn := 1
+Parbegin                                  Parbegin
+  repeat                                    repeat
+    while(turn = 2) do {niente}                while(turn=1) do {niente}
+    while(c2 = 0) do                           while(c1 = 0) do 
+      if(turn = 2) do {niente}                    if(turn = 1) do {niente}
+    c1 := 0                                    c2 := 0
+    {CS}                                       {CS}
+    turn := 2                                  turn := 1
+    c1 := 1                                    c2 := 1
+    {resto ciclo}                              {resto ciclo}
+  forever                                   forever
+Parend                                    Parend
+----------------------------------------------------------------------------
+c1 e c2 flag che definiscono chi *e' in CS*, 1 se e' fuori e 0 se e' dentro
+turn indica a chi e' concesso entrare in CS
+Se l'altra flag vale 0, l'altro processo e' in CS, quindi attendo
+Dopo di che', posso entrare, e alla fine reimposto le variabili per far andare l'altro proc
