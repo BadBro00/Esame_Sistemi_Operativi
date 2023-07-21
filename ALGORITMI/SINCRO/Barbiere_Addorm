@@ -1,0 +1,36 @@
+const sedie N
+var
+  coda : integer
+  CS : semaphore := 1
+  cliente : semaphore := 0
+  barbiere : semaphore := 1
+//Cliente
+Parbegin
+  repeat
+    wait(CS)
+    if(coda<sedie){
+      coda++;
+      signal(CS);
+      wait(barbiere);
+      {/*Taglio Capelli*/}
+    }else{
+      {/*esci*/}
+      signal(CS);
+    }
+  forever
+Parend
+//Barbiere
+Parbegin
+  repeat
+    wait(cliente)
+    wait(CS)
+    coda--;
+    signal(barbiere)
+    signal(CS)
+    {/*Taglia Capelli*/}
+  forever
+Parend
+----------------------------------------
+Il barbiere si blocca mentre non ci sono clienti.
+Quando arriva un cliente, se trova posto, aumenta il valore di coda, ed entrando si pone in attesa per il barbiere
+Se non trova posto, rilascia il semaforo CS ed esce, garantendo cosi' Mutua Esclusione
