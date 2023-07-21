@@ -1,0 +1,29 @@
+type item = ...
+var
+  buffer : array[0] of item
+  full : semaphore := 0
+  empty : semaphore := 1
+begin
+//Prod
+Parbegin
+  repeat
+    wait(empty)
+    buffer[0] := ...
+    signal(full)
+    {resto ciclo}
+  forever
+Parend
+//Cons
+Parbegin
+  repeat
+    wait(full)
+    x := buffer[0]
+    signal(empty)
+    {resto ciclo}
+  forever
+Parend
+------------------------------------
+Il produttore aspetta che vi sia il buffer sia vuoto, produce un elemento e lo posiziona in buffer[0]
+Dopo di che, segnala al consumatore che ha prodotto un elemento, che potra' consumare
+
+Il consumatore aspetta che vi sia un elemento nel buffer, lo consuma e segnala al produttore che puo' produrre
