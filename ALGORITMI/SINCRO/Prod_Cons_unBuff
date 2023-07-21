@@ -1,0 +1,36 @@
+var
+  prodotto : boolean
+  consumato : boolean
+begin
+  prodotto = false
+  consumato = false
+//Produttore
+Parbegin
+  repeat
+    if(esiste buffer vuoto) then
+      {produci}
+      prodotto = true
+    {resto ciclo}
+  forever
+Parend
+//Consumatore
+Parbegin
+  repeat
+    if(esiste buffer pieno) then
+      {consuma}
+      consumato = true
+    {resto ciclo}
+  forever
+Parend
+-----------------------------------------------
+Produttore controlla se esiste un buff vuoto, e nel caso:
+  produce un elemento
+  imposta prodotto a true
+  Procede con resto del ciclo
+Altrimenti, continua con resto del ciclo
+
+Consumatore controlla se esiste un buff pieno, e nel caso:
+  Consuma l'elemento
+  imposta consumato a true
+  Procede con resto ciclo
+Altrimenti, continua con resto ciclo
