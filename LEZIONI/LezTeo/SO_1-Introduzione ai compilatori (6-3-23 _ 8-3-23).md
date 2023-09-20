@@ -1,5 +1,3 @@
-https://help.obsidian.md/How+to/Format+your+notes
-----------------------------------------------------------------------
 **I) SO, Computer e Programmi Utente**
 ---
 *Kernel*
