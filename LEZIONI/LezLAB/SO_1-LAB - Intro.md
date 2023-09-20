@@ -23,7 +23,7 @@
 		Quando un programma apre o crea un file, viene creato un *descrittore di file* (fd) che è un intero non negativo, che identifica il programma aperto. Tutte le operazioni sul file verranno svolte tramite il fd, e dunque sempre sullo stesso file. All'avvio, la shell apre tre descrittori *standard*, ovvero **standard input (0)** cioè la tastiera, **standard output (1)** cioè lo schermo, e **standard error (2)**, sempre lo schermo. Questi rimarranno sempre i descrittori di default per queste tre componenti, a meno di una duplicazione dei descrittori (*dup()/dup2()*) e successiva chiusura (*close()*).
 		Si possono *redirigire* gli output e gli input dei file verso altri file, mediante gli operatori *> <*.
 		Con questo snippet vediamo come:
- ```Bash
+`
 $ ./a.out "ecco l'output"
 "ecco l'output"
 $ ./a.out > output.txt
@@ -34,18 +34,17 @@ $ echo "sono il nuovo input" > input.txt
 $ ./a.out < input.txt > output.txt
 $ cat output.txt
 "sono il nuovo input"
-```
--
+`
 	*Standard I/O*
 		Le funzioni standard di Input/Output di UNIX forniscono un'interfaccia *bufferizzata* alle function di I/O non bufferizzato.
 		Le function risiedono nella libreria *<stdio.h>*, e consentono di non doversi preoccupare della scelta ottimale della dimensione del buffer per le operazioni di I/O. Un ulteriore vantaggio è quello di rendere più semplice il trattamento delle *linee di input*:
 			La function *fgets()* legge un'intera riga, mentre la function *read()* legge solo un certo numero di byte.
- ```C
- #include <stdio.h>
- int main(void) {
-	 int c; 
-	 while ((c = getc(stdin)) != EOF) 
-		 if (putc(c,stdout) == EOF){ 
+`
+#include <stdio.h>
+int main(void) {
+	int c; 
+	while ((c = getc(stdin)) != EOF) 
+		if (putc(c,stdout) == EOF){ 
 			 printf(“errore di output\n”);
 			 exit(1);
 		 }
@@ -55,8 +54,7 @@ $ cat output.txt
 	 }
 	 exit(0);
  }
-```
- -
+`
 	 *Programmi e Processi*
 		 Un programma è un file eseguibile che risiede nel file system. Un processo è *un programma in esecuzione, che usa le risorse ad esso allocate*. All'esecuzione, il programma viene caricato in memoria, ed eseguito dal kernel, quando riceve una chiamata ad una function della famiglia *exec()*. Ciascun processo è identificato da un **Process ID**, un intero non negativo univoco nel sistema *finchè tale processo è in esecuzione*. Il kernel di UNIX utilizza il *riciclo* del PID, cioè eseguendo due volte lo stesso programma, ad istanti differenti, *è possibile che il PID del processo cambi*. Ciò avviene perchè qualche altro processo ha ricevuto il PID del processo che ha appena terminato l'esecuzione.
 		 Ci sono tre function principali per la gestione dei processi:
@@ -64,7 +62,7 @@ $ cat output.txt
 			 *exec()* : Inizia l'esecuzione di un processo
 			 *waitpid()* : Attende lo stato di terminazione di un processo
 		In questo snippet possiamo vedere come creando un processo figlio, possiamo fargli eseguire dei comandi, passati da input, e se il processo figlio sta eseguendo delle istruzioni, il padre aspetterà che esso termini tramite la waitpid():
-```C
+`
 #include <error.h>
 #include <string.h>
 #include <sys/wait.h>
@@ -94,8 +92,7 @@ int main(void) {
 	}
 	exit(0);
 }
-```
--
+`
 	*Gestione Errori*
 		Per segnalare una situazione di errore, le funzioni UNIX ritornano un valore negativo, e l'intero *errno* è inizializzato ad un valore che fornisce ulteriori informazioni sull'errore. Nell'header *<errno.h>* si trovano le corrispondenze fra tali valori e le costanti numeriche associate.
 		Le function per la gestione degli errori sono:
