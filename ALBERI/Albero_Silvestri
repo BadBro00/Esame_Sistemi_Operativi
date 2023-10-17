@@ -1,0 +1,17 @@
+int glob=20;
+int pid=0;
+int main(){
+  for(int i=1;i<3;i++){
+    if(pid)
+      fork();
+    if(!pid)
+      g*=2;
+    glob--;
+   }
+  printf("Valore di glob: %d\n",glob);
+}
+
+------------------------------------
+            SOLUZIONE
+------------------------------------
+A(0,77)
